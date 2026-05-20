@@ -31,7 +31,7 @@
 ---
 
 ## 🍔 Veritabanı Kapsamı
-
+Kalori : Protein x 4, Karb x 4, Yağ x 9
 | Kategori | İçerik |
 |---|---|
 | 🍳 Kahvaltılık | Yumurta, peynirler, sucuk, simit, poğaça ve daha fazlası |
