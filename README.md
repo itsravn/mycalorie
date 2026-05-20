@@ -6,7 +6,7 @@
 
 ---
 
-## 📱 Ekran Görüntüleri
+## 📱 Basit Tema
 
 | Bugün | Geçmiş | Profil |
 |---|---|---|
