@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>MyCalorie – Kalori ve Makro Takipçisi</title>
+    <meta name="description" content="MyCalorie ile günlük kalori, protein, karbonhidrat ve yağ takibini kolayca yap. Türkiye'nin en kapsamlı yemek veritabanı." />
+    <meta name="theme-color" content="#09090b">
+    <link rel="manifest" href="/mycalorie/manifest.json" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/mycalorie/icon-192.png" />
+    <link rel="apple-touch-icon" href="/mycalorie/icon-192.png" />
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script type="module" crossorigin src="/mycalorie/assets/index-BCmjk0vm.js"></script>
+    <link rel="stylesheet" crossorigin href="/mycalorie/assets/index-C67P8r5j.css">
+  </head>
+  <body>
+    <div id="app">
+      <header class="app-header">
+        <h1 id="header-title">MyCalorie</h1>
+        <button id="btn-settings" class="icon-btn"><i data-lucide="settings"></i></button>
+      </header>
+
+      <!-- VIEW: HOME -->
+      <main id="view-home" class="view active">
+        <!-- Calorie Ring -->
+        <section class="calorie-card glass">
+          <div class="ring-container">
+            <svg viewBox="0 0 36 36" class="circular-chart">
+              <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+              <path class="circle" id="cal-ring" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+            </svg>
+            <div class="ring-text">
+              <span id="cal-consumed" class="consumed">0</span>
+              <span class="divider">/</span>
+              <span id="cal-goal" class="goal">2000</span>
+              <span class="label">kcal</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Macros -->
+        <section class="macros-card glass">
+          <div class="macro">
+            <span class="macro-label">Protein <small id="prot-text">0/100g</small></span>
+            <div class="progress-bar"><div class="progress prot-fill" id="prot-bar"></div></div>
+          </div>
+          <div class="macro">
+            <span class="macro-label">Karb <small id="carb-text">0/200g</small></span>
+            <div class="progress-bar"><div class="progress carb-fill" id="carb-bar"></div></div>
+          </div>
+          <div class="macro">
+            <span class="macro-label">Yağ <small id="fat-text">0/60g</small></span>
+            <div class="progress-bar"><div class="progress fat-fill" id="fat-bar"></div></div>
+          </div>
+        </section>
+
+        <!-- Water Tracker -->
+        <section class="water-card glass">
+          <div class="water-header">
+            <div style="display:flex; align-items:center; gap:6px;">
+              <i data-lucide="droplet" style="color:#38bdf8; width:20px; height:20px;"></i>
+              <h3>Su Tüketimi</h3>
+            </div>
+            <span id="water-text">0 / 2500 ml</span>
+          </div>
+          <div class="water-controls">
+            <button class="water-btn" onclick="addWater(250)">+250ml</button>
+            <button class="water-btn" onclick="addWater(500)">+500ml</button>
+            <button class="water-btn-icon" onclick="removeWater(250)"><i data-lucide="minus"></i></button>
+          </div>
+          <div class="progress-bar mt-10"><div class="progress" id="water-bar" style="background:#38bdf8;"></div></div>
+        </section>
+
+        <!-- Today's Log -->
+        <section class="log-section">
+          <h2>Tüketilenler</h2>
+          <div id="food-list" class="food-list"></div>
+        </section>
+
+        <button id="btn-add" class="fab"><i data-lucide="plus"></i></button>
+      </main>
+
+      <!-- VIEW: HISTORY -->
+      <main id="view-history" class="view">
+        <div class="history-controls glass">
+          <button id="btn-prev-day" class="icon-btn"><i data-lucide="chevron-left"></i></button>
+          <h2 id="history-date">Seçilen Tarih</h2>
+          <button id="btn-next-day" class="icon-btn"><i data-lucide="chevron-right"></i></button>
+        </div>
+        
+        <div class="history-summary glass">
+          <div class="h-stat">
+            <span class="h-val" id="h-cal" style="color:var(--accent)">0</span>
+            <span class="h-lbl">Kalori</span>
+          </div>
+          <div class="h-stat">
+            <span class="h-val" id="h-water" style="color:#38bdf8">0</span>
+            <span class="h-lbl">Su (ml)</span>
+          </div>
+        </div>
+
+        <section class="log-section mt-20">
+          <h2>Bu Günün Kayıtları</h2>
+          <div id="history-food-list" class="food-list"></div>
+        </section>
+      </main>
+
+      <!-- VIEW: PROFILE -->
+      <main id="view-profile" class="view">
+        <section class="profile-card glass">
+          <div style="display:flex; align-items:center; gap:8px; margin-bottom: 6px;">
+            <i data-lucide="activity" style="color:var(--accent)"></i>
+            <h2 style="margin:0;">Kilo Takibi</h2>
+          </div>
+          <p class="text-muted text-sm" style="margin-top:0;">Güncel kilonuzu ve hedefinizi girin.</p>
+          
+          <div class="weight-inputs">
+            <div class="w-group">
+              <label>Şu Anki Kilo (kg)</label>
+              <input type="number" id="inp-current-weight" class="input-field" step="0.1" />
+            </div>
+            <div class="w-group">
+              <label>Hedef Kilo (kg)</label>
+              <input type="number" id="inp-target-weight" class="input-field" step="0.1" />
+            </div>
+          </div>
+          <button id="btn-save-weight" class="btn-primary mt-10">Güncelle</button>
+          
+          <div class="weight-progress mt-20">
+            <div style="display:flex; justify-content:space-between; margin-bottom:8px;">
+              <span id="lbl-weight-start" class="text-sm text-muted">Başlangıç</span>
+              <span id="lbl-weight-target" class="text-sm text-muted">Hedef</span>
+            </div>
+            <div class="progress-bar" style="height:12px; background:rgba(0,0,0,0.3)">
+              <div class="progress" id="weight-bar" style="background:var(--success);"></div>
+            </div>
+            <p id="lbl-weight-status" class="text-center mt-10 text-sm" style="color:var(--accent); font-weight:600;"></p>
+          </div>
+        </section>
+
+        <section class="log-section mt-20">
+          <h2>Kilo Geçmişi</h2>
+          <div id="weight-history-list" class="food-list">
+            <!-- Dinamik olarak JS tarafından doldurulacak -->
+          </div>
+        </section>
+      </main>
+
+      <!-- Bottom Navigation -->
+      <nav class="bottom-nav glass-nav">
+        <button class="nav-item active" data-target="view-home">
+          <i data-lucide="home" class="nav-icon"></i>
+          <span class="nav-label">Bugün</span>
+        </button>
+        <button class="nav-item" data-target="view-history">
+          <i data-lucide="calendar" class="nav-icon"></i>
+          <span class="nav-label">Geçmiş</span>
+        </button>
+        <button class="nav-item" data-target="view-profile">
+          <i data-lucide="user" class="nav-icon"></i>
+          <span class="nav-label">Profil</span>
+        </button>
+      </nav>
+
+      <!-- Add Food Modal -->
+      <div id="modal-add" class="modal-overlay">
+        <div class="modal-content glass">
+          <div class="modal-header">
+            <h3>Yemek Ekle</h3>
+            <button id="btn-close-modal" class="icon-btn"><i data-lucide="x"></i></button>
+          </div>
+          <div class="tabs">
+            <button class="tab active" data-target="search">Arama</button>
+            <button class="tab" data-target="manual">Manuel</button>
+          </div>
+          <div id="tab-search" class="tab-content active">
+            <div class="search-box-wrapper">
+              <i data-lucide="search" class="search-icon"></i>
+              <input type="text" id="search-input" placeholder="Yemek ara..." class="input-field search-input-padded" />
+            </div>
+            <div id="search-results" class="search-results mt-10"></div>
+          </div>
+          <div id="tab-manual" class="tab-content">
+            <input type="text" id="m-name" placeholder="Yemek Adı" class="input-field" />
+            <div class="input-row">
+              <input type="number" id="m-ref" placeholder="Referans Miktar (örn: 100)" class="input-field" />
+              <input type="text" id="m-unit" placeholder="Birim (g, adet)" class="input-field" />
+            </div>
+            <div class="input-row">
+              <input type="number" id="m-cal" placeholder="Kalori" class="input-field" />
+              <input type="number" id="m-p" placeholder="Protein (g)" class="input-field" />
+            </div>
+            <div class="input-row">
+              <input type="number" id="m-c" placeholder="Karb (g)" class="input-field" />
+              <input type="number" id="m-f" placeholder="Yağ (g)" class="input-field" />
+            </div>
+            <button id="btn-save-manual" class="btn-primary mt-10">Havuzuma Ekle</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Portion Modal -->
+      <div id="modal-portion" class="modal-overlay">
+        <div class="modal-content glass" style="max-width: 320px;">
+          <div class="modal-header" style="margin-bottom: 10px;">
+            <h3 id="p-title" style="font-size: 18px;">Yemek</h3>
+            <button id="btn-close-portion" class="icon-btn"><i data-lucide="x"></i></button>
+          </div>
+          
+          <div style="display:flex; gap:10px; align-items:center; margin-bottom:15px;">
+            <input type="number" id="p-amount" class="input-field portion-input" />
+            <span id="p-unit" style="font-weight:600; color:var(--text-muted); width:60px;">g</span>
+          </div>
+          
+          <div class="history-summary portion-summary">
+            <div class="h-stat">
+              <span class="h-val" id="p-cal-val" style="color:var(--accent); font-size:20px;">0</span>
+              <span class="h-lbl">kcal</span>
+            </div>
+            <div class="h-stat">
+              <span class="h-val" id="p-p-val" style="color:var(--protein); font-size:16px;">0</span>
+              <span class="h-lbl">P</span>
+            </div>
+            <div class="h-stat">
+              <span class="h-val" id="p-c-val" style="color:var(--carb); font-size:16px;">0</span>
+              <span class="h-lbl">K</span>
+            </div>
+            <div class="h-stat">
+              <span class="h-val" id="p-f-val" style="color:var(--fat); font-size:16px;">0</span>
+              <span class="h-lbl">Y</span>
+            </div>
+          </div>
+          
+          <button id="btn-save-portion" class="btn-primary">Günlüğe Ekle</button>
+        </div>
+      </div>
+      
+      <!-- Settings Modal -->
+      <div id="modal-settings" class="modal-overlay">
+        <div class="modal-content glass">
+          <div class="modal-header">
+            <h3>Makro Hedefleri</h3>
+            <button id="btn-close-settings" class="icon-btn"><i data-lucide="x"></i></button>
+          </div>
+          <div class="settings-form">
+            <label>Günlük Kalori</label>
+            <input type="number" id="set-cal" class="input-field" />
+            <div class="input-row">
+              <div style="flex:1;">
+                <label>Protein (g)</label>
+                <input type="number" id="set-p" class="input-field" />
+              </div>
+              <div style="flex:1;">
+                <label>Karb (g)</label>
+                <input type="number" id="set-c" class="input-field" />
+              </div>
+              <div style="flex:1;">
+                <label>Yağ (g)</label>
+                <input type="number" id="set-f" class="input-field" />
+              </div>
+            </div>
+            <label>Günlük Su Hedefi (ml)</label>
+            <input type="number" id="set-w" class="input-field" />
+            <button id="btn-save-settings" class="btn-primary mt-20">Ayarları Kaydet</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+    <script>
+      // Initialize lucide icons for static HTML
+      lucide.createIcons();
+    </script>
+  </body>
+</html>
